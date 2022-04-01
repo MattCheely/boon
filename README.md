@@ -44,3 +44,12 @@ AND
   )
 )
 ```
+
+## Notes
+
+If you need similar behavior in JS, try [boon-js](https://github.com/jakec-github/boon-js), which I believe is the
+origin of the Boon spec. 
+
+Not every function is fully tail-call optimized, so it may be possible to overflow the stack with a really 
+_seriously_ big Boon expression. If you encounter this, please open a GitHub issue with an [SSCCE](http://www.sscce.org/)
+for recreating the problem.

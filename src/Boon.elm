@@ -1,6 +1,6 @@
 module Boon exposing
     ( Expression, parse
-    , evalFromDict, evalFromSet, eval
+    , evalFromDict, evalFromSet, eval, identifiers
     )
 
 {-| Parsing and evaulation of [Boon](https://docs.google.com/document/u/0/d/1UzsnnKjjW7T_u-OPb5dcPmc9My4YS_jHoyButolNVa4/mobilebasic#heading=h.wazvxi10wtkz) strings.
@@ -22,12 +22,12 @@ In the boon expression:
 
 # Evaluate
 
-@docs evalFromDict, evalFromSet, eval
+@docs evalFromDict, evalFromSet, eval, identifiers
 
 -}
 
 import Dict exposing (Dict)
-import Internals exposing (Expr, evaluate, parse)
+import Internals exposing (Expr)
 import Set exposing (Set)
 
 
@@ -54,11 +54,13 @@ key is absent, it will evaluate to `False`
             , ( "bar", False )
             ]
 
-    (parse "foo OR bar"
-        |> evalFromDict values) == True
+    -- Evaluates to True
+    parse "foo OR bar"
+        |> evalFromDict values
 
-    (parse "baz OR bar"
-        |> evalFromDict values) == False
+    -- Evaluates to False
+    parse "baz OR bar"
+        |> evalFromDict values
 
 -}
 evalFromDict : Dict String Bool -> Expression -> Bool
@@ -72,11 +74,13 @@ present in the set are `True`, any others are `False`.
 
     values = Set.fromList ["foo", "bar"]
 
-    (parse "foo AND bar"
-        |> evalFromSet values) == True
+    -- Evaluates to True
+    parse "foo AND bar"
+        |> evalFromSet values
 
-    (parse "bar AND baz"
-        |> evalFromSet values) == False
+    -- Evaluates to False
+    parse "bar AND baz"
+        |> evalFromSet values
 
 -}
 evalFromSet : Set String -> Expression -> Bool
@@ -87,7 +91,27 @@ evalFromSet values expr =
 
 {-| Evaluate an expression based on a user-provided lookup function that maps
 identifiers to boolean values.
+
+    trueOrFalse str =
+        if (str == "true") then
+            True
+        else
+            False
+
+    -- Evaluates to False
+    parse "true AND false"
+        |> eval trueOrFalse
+
 -}
 eval : (String -> Bool) -> Expression -> Bool
 eval lookupFn (Expr expr) =
     Internals.evaluate lookupFn expr
+
+
+{-| Get the set of identifiers used in an expression. This can be useful if
+you need to fetch these identifiers from some external source with a Cmd prior
+to evaluation, or validate that they meet some specific format.
+-}
+identifiers : Expression -> Set String
+identifiers (Expr expr) =
+    Internals.identifiers Set.empty expr

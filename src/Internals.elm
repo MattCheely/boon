@@ -1,4 +1,4 @@
-module Internals exposing (Expr(..), evaluate, parse)
+module Internals exposing (Expr(..), evaluate, identifiers, parse)
 
 import Dict exposing (Dict)
 import Errors
@@ -47,6 +47,31 @@ parse string =
                 |. end
             )
         |> Result.mapError Errors.toString
+
+
+identifiers : Set String -> Expr -> Set String
+identifiers acc expr =
+    case expr of
+        Identifier i ->
+            Set.insert i acc
+
+        Not expr1 ->
+            identifiers acc expr1
+
+        Xor expr1 expr2 ->
+            acc
+                |> Set.union (identifiers Set.empty expr1)
+                |> Set.union (identifiers Set.empty expr2)
+
+        And expr1 expr2 ->
+            acc
+                |> Set.union (identifiers Set.empty expr1)
+                |> Set.union (identifiers Set.empty expr2)
+
+        Or expr1 expr2 ->
+            acc
+                |> Set.union (identifiers Set.empty expr1)
+                |> Set.union (identifiers Set.empty expr2)
 
 
 

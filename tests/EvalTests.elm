@@ -3,7 +3,8 @@ module EvalTests exposing (..)
 import Dict exposing (Dict)
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
-import Internals exposing (Expr(..), evaluate)
+import Internals exposing (Expr(..), evaluate, identifiers)
+import Set
 import Test exposing (..)
 
 
@@ -55,6 +56,19 @@ suite =
                         )
                     )
                     |> Expect.equal True
+        , test "provides access to identifiers in an expression" <|
+            \_ ->
+                identifiers Set.empty
+                    (And
+                        (And (Not (Identifier "one"))
+                            (Identifier "two")
+                        )
+                        (Xor
+                            (Not (Identifier "three"))
+                            (Or (Identifier "four") (Identifier "two"))
+                        )
+                    )
+                    |> Expect.equal (Set.fromList [ "one", "two", "three", "four" ])
         ]
 
 
