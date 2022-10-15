@@ -230,15 +230,49 @@ suite =
         ]
 
 
+type Ingredient
+    = Meat String
+    | Cheese String
+    | Bread String
+
+
+identifierFromString : String -> Result String Ingredient
+identifierFromString str =
+    if String.startsWith "meat:" str then
+        Ok (Meat (String.dropLeft 5 str))
+
+    else if String.startsWith "cheese:" str then
+        Ok (Cheese (String.dropLeft 7 str))
+
+    else if String.startsWith "bread:" str then
+        Ok (Bread (String.dropLeft 6 str))
+
+    else
+        Err (str ++ " is not a valid ingredient")
+
+
+testIdentifierParsing =
+    describe "Custom Identifier Parsing"
+        [ test "Works correctly with valid identifiers" <|
+            \_ ->
+                parse identifierFromString "meat:ham AND cheese:swiss AND bread:rye"
+                    |> Expect.equal (Ok (And (And (Identifier (Meat "ham")) (Identifier (Cheese "swiss"))) (Identifier (Bread "rye"))))
+        , test "Fails if any identifier is bad" <|
+            \_ ->
+                parse identifierFromString "meat:bacon AND veg:tomatoes"
+                    |> Expect.err
+        ]
+
+
 testFailure ( description, input ) =
     test description <|
         \_ ->
-            parse input
+            parse Ok input
                 |> Expect.err
 
 
 testSuccess ( textExpr, parsed ) =
     test textExpr <|
         \_ ->
-            parse textExpr
+            parse Ok textExpr
                 |> Expect.equal (Ok parsed)

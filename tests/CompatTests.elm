@@ -16,7 +16,7 @@ suite =
 testCompat ( expr, result ) =
     test expr <|
         \_ ->
-            parse expr
+            parse Ok expr
                 |> Result.map (evaluate lookup)
                 |> Expect.equal (Ok result)
 

@@ -58,7 +58,7 @@ suite =
                     |> Expect.equal True
         , test "provides access to identifiers in an expression" <|
             \_ ->
-                identifiers Set.empty
+                identifiers []
                     (And
                         (And (Not (Identifier "one"))
                             (Identifier "two")
@@ -68,6 +68,7 @@ suite =
                             (Or (Identifier "four") (Identifier "two"))
                         )
                     )
+                    |> Set.fromList
                     |> Expect.equal (Set.fromList [ "one", "two", "three", "four" ])
         ]
 
@@ -83,7 +84,7 @@ lookup identifier =
         |> Maybe.withDefault False
 
 
-checkTable : (Expr -> Expr -> Expr) -> List ( Bool, Bool, Bool ) -> Expectation
+checkTable : (Expr String -> Expr String -> Expr String) -> List ( Bool, Bool, Bool ) -> Expectation
 checkTable op table =
     logicTable op table
         |> List.map (\( expr, res ) -> Expect.equal (evaluate lookup expr) res)
@@ -91,7 +92,7 @@ checkTable op table =
         |> (\expects -> Expect.all expects ())
 
 
-logicTable : (Expr -> Expr -> Expr) -> List ( Bool, Bool, Bool ) -> List ( Expr, Bool )
+logicTable : (Expr String -> Expr String -> Expr String) -> List ( Bool, Bool, Bool ) -> List ( Expr String, Bool )
 logicTable op table =
     table
         |> List.map
@@ -100,7 +101,7 @@ logicTable op table =
             )
 
 
-boolToken : Bool -> Expr
+boolToken : Bool -> Expr String
 boolToken b =
     if b then
         Identifier "true"
