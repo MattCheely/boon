@@ -55,14 +55,15 @@ in them and you want to map them to custom types.
 
     parseIngredient : String -> Result String Ingredient
     parseIngredient str =
-        if String.startsWith "meat:" str then
-            Ok (Meat (String.dropLeft 5 str))
+        case String.split ":" str of
+            "meat" :: rest ->
+                Ok (Meat (String.concat rest))
 
-        else if String.startsWith "cheese:" str then
-            Ok (Cheese (String.dropLeft 7 str))
+            "cheese" :: rest ->
+                Ok (Cheese (String.concat rest))
 
-        else
-            Err (str ++ " is not a valid ingredient")
+            _ ->
+                Err (str ++ " is not a valid ingredient")
 
     sandwichCheck : Ingredient -> Bool
     sandwichCheck ingredient =

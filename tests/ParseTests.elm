@@ -236,30 +236,31 @@ type Ingredient
     | Bread String
 
 
-identifierFromString : String -> Result String Ingredient
-identifierFromString str =
-    if String.startsWith "meat:" str then
-        Ok (Meat (String.dropLeft 5 str))
+parseIngredient : String -> Result String Ingredient
+parseIngredient str =
+    case String.split ":" str of
+        "meat" :: rest ->
+            Ok (Meat (String.concat rest))
 
-    else if String.startsWith "cheese:" str then
-        Ok (Cheese (String.dropLeft 7 str))
+        "cheese" :: rest ->
+            Ok (Cheese (String.concat rest))
 
-    else if String.startsWith "bread:" str then
-        Ok (Bread (String.dropLeft 6 str))
+        "bread" :: rest ->
+            Ok (Bread (String.concat rest))
 
-    else
-        Err (str ++ " is not a valid ingredient")
+        _ ->
+            Err (str ++ " is not a valid ingredient")
 
 
 testIdentifierParsing =
     describe "Custom Identifier Parsing"
         [ test "Works correctly with valid identifiers" <|
             \_ ->
-                parse identifierFromString "meat:ham AND cheese:swiss AND bread:rye"
+                parse parseIngredient "meat:ham AND cheese:swiss AND bread:rye"
                     |> Expect.equal (Ok (And (And (Identifier (Meat "ham")) (Identifier (Cheese "swiss"))) (Identifier (Bread "rye"))))
         , test "Fails if any identifier is bad" <|
             \_ ->
-                parse identifierFromString "meat:bacon AND veg:tomatoes"
+                parse parseIngredient "meat:bacon AND veg:tomatoes"
                     |> Expect.err
         ]
 
